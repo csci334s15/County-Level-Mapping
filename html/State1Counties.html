@@ -4,7 +4,7 @@
 	<head>
 
 		<meta charset="utf-8">
-		<title>Splitting the states</title>
+		<title>PA Counties</title>
 		<script type="text/javascript" src="../d3/d3.v3.js"></script>
 		<style type="text/css">
 		</style>
@@ -20,6 +20,7 @@
 			var w = 800;
 			var h = 600;
 			var centered;
+			var seenStates = []
 
 			//Define map projection
 			var projection = d3.geo.albersUsa()
@@ -47,14 +48,50 @@
 			var states = svg.append("svg:g")
 			     			.attr("id", "states");
 
-			d3.json("json/us-states.json", function(json) {
-				   svg.selectAll("path")
+			var readStates = function() {
+
+				d3.selectAll("path").remove();
+
+				d3.json("json/us-states.json", function(json) {
+					   svg.selectAll("path")
+				       .data(json.features)
+				       .enter()
+				       .append("svg:path")
+				       .attr("d", path)
+				       .attr("class", "state")
+				       .attr("id", function(d) {
+				       		return d.properties.name;
+				       })
+				       .attr("stroke", "black")
+				       .attr("stroke-width", 1)
+				       .attr("visibility", "visible")
+				       .attr("fill", function() {
+					       	var letters = '0123456789ABCDEF'.split('');
+						    var color = '#';
+						    for (var i = 0; i < 6; i++ ) {
+						        color += letters[Math.floor(Math.random() * 16)];
+						    }
+						    return color;
+						})
+				       .on("click", drawCounties);
+				});			
+
+				
+			};
+
+			var readCounties = function(state) {
+
+				d3.selectAll("path").remove();
+
+				d3.json("json/Alabama.json", function(json) {
+					svg.selectAll("path")
 			       .data(json.features)
 			       .enter()
 			       .append("svg:path")
 			       .attr("d", path)
+			       .attr("class", "county")
 			       .attr("id", function(d) {
-			       		return d.properties.name;
+			       		return state + ": " + d.properties.NAME;
 			       })
 			       .attr("stroke", "black")
 			       .attr("stroke-width", 1)
@@ -66,39 +103,21 @@
 					    }
 					    return color;
 					})
-			       .on("click", clicked);
-			});		
-
-			var clicked = function(d) {
-				
-			    var x, y, k;
-
-				if (d && centered !== d) {
-					var centroid = path.centroid(d);
-					x = centroid[0];
-					y = centroid[1];
-					k = 4;
-					centered = d;
-				} 
-				else {
-					x = w / 2;
-					y = h / 2;
-					k = 1;
-					centered = null;
-				}
-
-				svg.selectAll("path")
-				  .classed("active", centered && function(d) { return d === centered; });
-
-				svg.transition()
-				  .duration(750)
-				  .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
-				  .style("stroke-width", 1.5 / k + "px");
-
-
-
+			       .on("click", drawStates);
+			   });
 			};
 
+			var drawStates = function() {
+				readStates();
+			};
+
+
+			var drawCounties = function(state) {
+				readCounties();
+			};
+
+			readStates();
+			
 		</script>
 
 

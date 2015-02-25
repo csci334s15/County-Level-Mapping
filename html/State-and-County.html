@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+
+		<meta charset="utf-8">
+		<title>PA Counties</title>
+		<script type="text/javascript" src="../d3/d3.v3.js"></script>
+		<style type="text/css">
+		</style>
+
+	</head>
+
+
+	<body>
+
+		<script type="text/javascript">
+
+			// Width and Height of the svg
+			var w = 800;
+			var h = 600;
+			var centered;
+			var seenStates = []
+
+			//Define map projection
+			var projection = d3.geo.albersUsa()
+								   .translate([w/2, h/2])
+								   .scale([600]);
+
+			// Path of GeoJSON
+			var path = d3.geo.path()
+								.projection(projection);
+
+			//Define quantize scale to sort data values into buckets of color
+			var color = d3.scale.quantize()
+								.range(["rgb(237,248,233)","rgb(186,228,179)","rgb(116,196,118)","rgb(49,163,84)","rgb(0,109,44)"]);
+								//Colors taken from colorbrewer.js, included in the D3 download
+
+			var svg = d3.select("body")
+						.append("svg")
+						.attr("width", w)
+						.attr("height", h);
+
+			var counties = svg.append("svg:g")
+			      			  .attr("id", "counties")
+						      .attr("class", "Blues");
+			 
+			var states = svg.append("svg:g")
+			     			.attr("id", "states");
+
+			var readStates = function() {
+
+				d3.json("json/us-states.json", function(json) {
+					   svg.selectAll("path")
+				       .data(json.features)
+				       .enter()
+				       .append("svg:path")
+				       .attr("d", path)
+				       .attr("class", "state")
+				       .attr("id", function(d) {
+				       		return d.properties.name;
+				       })
+				       .attr("stroke", "black")
+				       .attr("stroke-width", 1)
+				       .attr("visibility", "visible")
+				       .attr("fill", function() {
+					       	var letters = '0123456789ABCDEF'.split('');
+						    var color = '#';
+						    for (var i = 0; i < 6; i++ ) {
+						        color += letters[Math.floor(Math.random() * 16)];
+						    }
+						    return color;
+						})
+				       .on("click", drawCounties);
+				});			
+
+				
+			};
+
+			var readCounties = function(state) {
+
+					d3.json("json/" + state + ".json", function(json) {
+						svg.selectAll("path")
+				       .data(json.features)
+				       .enter()
+				       .append("svg:path")
+				       .attr("d", path)
+				       .attr("class", "county")
+				       .attr("class", state)
+				       .attr("id", function(d) {
+				       		return state + ": " + d.properties.NAME;
+				       })
+				       .attr("stroke", "black")
+				       .attr("stroke-width", 1)
+				       .attr("visibility", "hidden")
+				       .attr("fill", function() {
+					       	var letters = '0123456789ABCDEF'.split('');
+						    var color = '#';
+						    for (var i = 0; i < 6; i++ ) {
+						        color += letters[Math.floor(Math.random() * 16)];
+						    }
+						    return color;
+						})
+				       .on("click", drawStates);
+				   });
+			};
+
+			var drawStates = function() {
+				d3.selectAll(".county").attr("visibility", "hidden");
+				d3.selectAll(".state").attr("visibility", "visible");
+			};
+
+
+			var drawCounties = function(state) {
+				d3.selectAll(".state").attr("visibility", "hidden");
+				d3.selectAll("." + state).attr("visibility", "visible");
+			};
+
+			readStates();
+			
+		</script>
+
+
+	</body>	
+
+
+
+
+</html>

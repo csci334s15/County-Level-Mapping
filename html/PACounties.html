@@ -4,7 +4,7 @@
 	<head>
 
 		<meta charset="utf-8">
-		<title>Splitting the states</title>
+		<title>PA Counties</title>
 		<script type="text/javascript" src="../d3/d3.v3.js"></script>
 		<style type="text/css">
 		</style>
@@ -47,6 +47,19 @@
 			var states = svg.append("svg:g")
 			     			.attr("id", "states");
 
+			var combo = d3.select("body")
+						  .append("select")
+						  .attr("id", "state-selector")
+						  .append("option")
+						  .attr("id", "yes")
+						  .attr("value", "yes")
+						  .text("yes");
+
+			combo.append("option")
+				 .attr("id", "no")
+				 .attr("value", "no")
+				 .text("no");
+
 			d3.json("json/us-states.json", function(json) {
 				   svg.selectAll("path")
 			       .data(json.features)
@@ -67,7 +80,32 @@
 					    return color;
 					})
 			       .on("click", clicked);
-			});		
+			});			
+
+			var combobox = d3.select("#state-selector").on("change", function() {
+
+				d3.json("json/PAcounties.json", function(json) {
+					svg.selectAll("path")
+			       .data(json.features)
+			       .enter()
+			       .append("svg:path")
+			       .attr("d", path)
+			       .attr("id", function(d) {
+			       		return "pa" + d.properties.NAME;
+			       })
+			       .attr("stroke", "black")
+			       .attr("stroke-width", 1)
+			       .attr("fill", function() {
+				       	var letters = '0123456789ABCDEF'.split('');
+					    var color = '#';
+					    for (var i = 0; i < 6; i++ ) {
+					        color += letters[Math.floor(Math.random() * 16)];
+					    }
+					    return color;
+					});
+			   });
+			});
+			
 
 			var clicked = function(d) {
 				
