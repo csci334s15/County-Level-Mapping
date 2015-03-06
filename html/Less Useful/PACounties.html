@@ -4,9 +4,8 @@
 	<head>
 
 		<meta charset="utf-8">
-		<title>Zooming</title>
+		<title>Trying things</title>
 		<script type="text/javascript" src="../d3/d3.v3.js"></script>
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 		<style type="text/css">
 		</style>
 
@@ -48,6 +47,19 @@
 			var states = svg.append("svg:g")
 			     			.attr("id", "states");
 
+			var combo = d3.select("body")
+						  .append("select")
+						  .attr("id", "state-selector")
+						  .append("option")
+						  .attr("id", "yes")
+						  .attr("value", "yes")
+						  .text("yes");
+
+			combo.append("option")
+				 .attr("id", "no")
+				 .attr("value", "no")
+				 .text("no");
+
 			d3.json("json/us-states.json", function(json) {
 				   svg.selectAll("path")
 			       .data(json.features)
@@ -60,33 +72,40 @@
 			       .attr("stroke", "black")
 			       .attr("stroke-width", 1)
 			       .attr("fill", function() {
-				       	return "blue";
+				       	var letters = '0123456789ABCDEF'.split('');
+					    var color = '#';
+					    for (var i = 0; i < 6; i++ ) {
+					        color += letters[Math.floor(Math.random() * 16)];
+					    }
+					    return color;
 					})
 			       .on("click", clicked);
-			});		
+			});			
 
-			var readCounties = function(state) {
+			var combobox = d3.select("#state-selector").on("change", function() {
 
-				d3.selectAll("path").remove();
-
-				d3.json("json/States/Alabama.json", function(json) {
+				d3.json("json/PAcounties.json", function(json) {
 					svg.selectAll("path")
 			       .data(json.features)
 			       .enter()
 			       .append("svg:path")
 			       .attr("d", path)
-			       .attr("class", "county")
 			       .attr("id", function(d) {
-			       		return state + ": " + d.properties.NAME;
+			       		return "pa" + d.properties.NAME;
 			       })
 			       .attr("stroke", "black")
 			       .attr("stroke-width", 1)
 			       .attr("fill", function() {
-				       	return "blue";
-					})
-			       .on("click",	clicked);
+				       	var letters = '0123456789ABCDEF'.split('');
+					    var color = '#';
+					    for (var i = 0; i < 6; i++ ) {
+					        color += letters[Math.floor(Math.random() * 16)];
+					    }
+					    return color;
+					});
 			   });
-			};
+			});
+			
 
 			var clicked = function(d) {
 				
@@ -114,19 +133,9 @@
 				  .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
 				  .style("stroke-width", 1.5 / k + "px");
 
-				  readCounties("state");
+
 
 			};
-
-			$(document).ready(function() {
-				$('path')
-				.mouseenter(function() {
-					$(this).css('fill', 'red');
-				})
-				.mouseleave(function() {
-					$(this).css('fill', 'blue');
-				});
-			});
 
 		</script>
 

@@ -4,7 +4,7 @@
 	<head>
 
 		<meta charset="utf-8">
-		<title>State to County</title>
+		<title>PA Counties</title>
 		<script type="text/javascript" src="../d3/d3.v3.js"></script>
 		<style type="text/css">
 		</style>
@@ -50,8 +50,6 @@
 
 			var readStates = function() {
 
-				d3.selectAll("path").remove();
-
 				d3.json("json/us-states.json", function(json) {
 					   svg.selectAll("path")
 				       .data(json.features)
@@ -74,48 +72,48 @@
 						    return color;
 						})
 				       .on("click", drawCounties);
-				});
+				});			
+
 				
 			};
 
 			var readCounties = function(state) {
 
-				d3.selectAll("path").remove();
-
-				d3.json("json/States/Alabama.json", function(json) {
-					svg.selectAll("path")
-			       .data(json.features)
-			       .enter()
-			       .append("svg:path")
-			       .attr("d", path)
-			       .attr("class", "county")
-			       .attr("id", function(d) {
-			       		return state + ": " + d.properties.NAME;
-			       })
-			       .attr("stroke", "black")
-			       .attr("stroke-width", 1)
-			       .attr("fill", function() {
-				       	var letters = '0123456789ABCDEF'.split('');
-					    var color = '#';
-					    for (var i = 0; i < 6; i++ ) {
-					        color += letters[Math.floor(Math.random() * 16)];
-					    }
-					    return color;
-					})
-			       .on("click",	drawStates);
-			   });
+					d3.json("json/" + state + ".json", function(json) {
+						svg.selectAll("path")
+				       .data(json.features)
+				       .enter()
+				       .append("svg:path")
+				       .attr("d", path)
+				       .attr("class", "county")
+				       .attr("class", state)
+				       .attr("id", function(d) {
+				       		return state + ": " + d.properties.NAME;
+				       })
+				       .attr("stroke", "black")
+				       .attr("stroke-width", 1)
+				       .attr("visibility", "hidden")
+				       .attr("fill", function() {
+					       	var letters = '0123456789ABCDEF'.split('');
+						    var color = '#';
+						    for (var i = 0; i < 6; i++ ) {
+						        color += letters[Math.floor(Math.random() * 16)];
+						    }
+						    return color;
+						})
+				       .on("click", drawStates);
+				   });
 			};
 
-			var drawStates = function(state) {
-				readStates();
+			var drawStates = function() {
+				d3.selectAll(".county").attr("visibility", "hidden");
+				d3.selectAll(".state").attr("visibility", "visible");
 			};
 
 
 			var drawCounties = function(state) {
-				name_of_state = state.properties.name;
-				if (name_of_state === "Alabama") {
-					readCounties(name_of_state);
-				}
+				d3.selectAll(".state").attr("visibility", "hidden");
+				d3.selectAll("." + state).attr("visibility", "visible");
 			};
 
 			readStates();
